@@ -1,9 +1,16 @@
 from typing import Any, Text, Dict, List
+from wsgiref import headers
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet, Restarted
 import requests
 import random
+
+def get_auth_headers(tracker: Tracker) -> Dict[str, str]:
+    token = tracker.latest_message.get("metadata", {}).get("access_token")
+    if token:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
 
 
 class ActionFetchQuestion(Action):
@@ -16,14 +23,17 @@ class ActionFetchQuestion(Action):
             question_num = tracker.get_slot("question_number") or 0
             score = tracker.get_slot("score") or 0
 
-            total_response = requests.get("http://localhost:8000/api/count/1/count/")
+            headers = get_auth_headers(tracker)
+            total_response = requests.get("http://localhost:8000/api/count/1/count/", headers=headers)
+
             total_response.raise_for_status()
             total_questions = total_response.json()["count"]
 
             if question_num >= total_questions:
                 return self._handle_exam_completion(dispatcher, exam_id, tracker)
 
-            question_response = requests.get(f"http://localhost:8000/api/questions/1/{question_num}/")
+            question_response = requests.get(f"http://localhost:8000/api/questions/1/{question_num}/", headers=headers)
+
             question_response.raise_for_status()
             response = question_response.json()
 
@@ -54,7 +64,8 @@ class ActionFetchQuestion(Action):
     def _handle_exam_completion(self, dispatcher: CollectingDispatcher, exam_id: int, tracker: Tracker):
         try:
             score = tracker.get_slot("score") or 0
-            total_response = requests.get("http://localhost:8000/api/count/1/count/")
+            total_response = requests.get("http://localhost:8000/api/count/1/count/", headers=get_auth_headers(tracker))
+
             total_response.raise_for_status()
             total_questions = total_response.json()["count"]
 
@@ -102,10 +113,12 @@ class ActionCheckAnswer(Action):
                 return []
 
             answer_map = {'A': 1, 'B': 2, 'C': 3, 'D': 4}
+            headers = get_auth_headers(tracker)
             response = requests.post(
                 f"http://localhost:8000/api/check_answer/1/{question_num}/",
-                json={"answer": answer_map[user_answer]},
-            )
+                headers=headers,
+                json={"answer": answer_map[user_answer]},)
+
             response.raise_for_status()
             result = response.json()
 
