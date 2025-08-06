@@ -18,27 +18,27 @@ nlu:
     - C
     - D
 
-# - intent: greet
-#   examples: |
-#     - Hi
-#     - Hello
-#     - Hey
-#     - Good morning
-#     - Good afternoon
-#     - What's up?
-#     - How are you?
-#     - Greetings
+- intent: greet
+  examples: |
+    - Hi
+    - Hello
+    - Hey
+    - Good morning
+    - Good afternoon
+    - What's up?
+    - How are you?
+    - Greetings
 
-# - intent: goodbye
-#   examples: |
-#     - Bye
-#     - Goodbye
-#     - See you later
-#     - Quit
-#     - Exit
-#     - I'm done
-#     - That's all
-#     - End session
+- intent: goodbye
+  examples: |
+    - Bye
+    - Goodbye
+    - See you later
+    - Quit
+    - Exit
+    - I'm done
+    - That's all
+    - End session
 
 # - intent: affirm
 #   examples: |

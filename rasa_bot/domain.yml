@@ -23,17 +23,21 @@ intents:
   - control_flow
   - greet
   - goodbye
+  
 
 actions:
   - action_fetch_question
   - action_check_answer
+  - action_greet_and_prompt
   # - utter_greet
   # - utter_exam_complete
 
 responses:
-  utter_greet:
-    - text: "Welcome to the MCQ Exam Bot! Type 'start exam' to begin."
+  # utter_greet:
+  #   - text: "Welcome to the DOU Exam Bot! Type 'start exam' to begin."
   utter_exam_complete:
     - text: "🎉 Exam completed! Check your score in Django."
-  utter_iamabot:  # Add this if needed
+  utter_iamabot:  
     - text: "I'm an exam assistance bot."
+  utter_goodbye:
+    - text: "Goodbye! Good luck with your studies!"
