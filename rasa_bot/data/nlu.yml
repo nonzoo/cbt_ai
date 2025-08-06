@@ -1,0 +1,74 @@
+version: "3.1"
+
+nlu:
+- intent: start_exam
+  examples: |
+    - I want to start the exam
+    - Begin test
+    - Start exam
+    - Can I take the test now?
+    - Ready for my exam
+    - Let's begin the quiz
+    - I'd like to start the MCQ test
+
+- intent: answer_question
+  examples: |
+    - A
+    - B
+    - C
+    - D
+
+# - intent: greet
+#   examples: |
+#     - Hi
+#     - Hello
+#     - Hey
+#     - Good morning
+#     - Good afternoon
+#     - What's up?
+#     - How are you?
+#     - Greetings
+
+# - intent: goodbye
+#   examples: |
+#     - Bye
+#     - Goodbye
+#     - See you later
+#     - Quit
+#     - Exit
+#     - I'm done
+#     - That's all
+#     - End session
+
+# - intent: affirm
+#   examples: |
+#     - Yes
+#     - Yeah
+#     - Yup
+#     - Sure
+#     - Absolutely
+#     - Correct
+#     - Right
+#     - Indeed
+
+# - intent: deny
+#   examples: |
+#     - No
+#     - Nope
+#     - Not really
+#     - Never
+#     - Negative
+#     - Incorrect
+#     - Wrong
+#     - I don't think so
+
+# - intent: out_of_scope
+#   examples: |
+#     - What's the weather today?
+#     - Tell me a joke
+#     - Who won the world cup?
+#     - How old are you?
+#     - What's your favorite color?
+#     - Can you sing a song?
+#     - I need help with my homework
+#     - What time is it?

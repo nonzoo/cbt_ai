@@ -1,0 +1,49 @@
+version: "3.1"
+
+stories:
+  - story: Start exam
+    steps:
+      - intent: start_exam
+      - action: action_fetch_question
+
+  - story: Correct answer flow
+    steps:
+      - intent: answer_question
+      - action: action_check_answer
+      - slot_was_set:
+        - score: 1  # Example of score increment
+      - action: action_fetch_question
+
+  - story: Incorrect answer flow
+    steps:
+      - intent: answer_question
+      - action: action_check_answer
+      - slot_was_set:
+        - score: 0  # Score remains unchanged
+      - action: action_fetch_question
+
+  # - story: Complete exam
+  #   steps:
+  #     - intent: answer_question
+  #     - action: action_check_answer
+  #     - action: utter_exam_complete
+  #     - action: action_restart
+
+  # - story: Invalid answer
+  #   steps:
+  #     - intent: answer_question
+  #     - action: action_check_answer
+  #     - action: action_fetch_question
+
+  # - story: Greet and start
+  #   steps:
+  #     - intent: greet
+  #     - action: utter_greet
+  #     - intent: start_exam
+  #     - action: action_fetch_question
+
+  # - story: End session
+  #   steps:
+  #     - intent: goodbye
+  #     - action: utter_goodbye
+  #     - action: action_restart

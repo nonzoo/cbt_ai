@@ -1,0 +1,39 @@
+version: "3.1"
+
+slots:
+  exam_id:
+    type: text
+    mappings:
+    - type: custom
+  question_number:
+    type: float
+    initial_value: 0.0
+    mappings:
+    - type: custom
+  score:
+    type: float
+    initial_value: 0.0
+    mappings:
+    - type: custom
+    influence_conversation: false
+
+intents:
+  - start_exam
+  - answer_question
+  - control_flow
+  - greet
+  - goodbye
+
+actions:
+  - action_fetch_question
+  - action_check_answer
+  # - utter_greet
+  # - utter_exam_complete
+
+responses:
+  utter_greet:
+    - text: "Welcome to the MCQ Exam Bot! Type 'start exam' to begin."
+  utter_exam_complete:
+    - text: "🎉 Exam completed! Check your score in Django."
+  utter_iamabot:  # Add this if needed
+    - text: "I'm an exam assistance bot."
