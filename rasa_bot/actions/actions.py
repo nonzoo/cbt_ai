@@ -45,9 +45,8 @@ class ActionFetchQuestion(Action):
             }
 
             question_text = (
-                f"Question {question_num + 1}/{total_questions}: {response['text']}\n\n"
+                f"Question {question_num + 1}: {response['text']}\n\n"
                 + "\n".join([f"{key}. {value}" for key, value in options.items()])
-                + "\n\nPlease answer with A, B, C, or D"
             )
 
             dispatcher.utter_message(text=question_text)
@@ -64,10 +63,24 @@ class ActionFetchQuestion(Action):
     def _handle_exam_completion(self, dispatcher: CollectingDispatcher, exam_id: int, tracker: Tracker):
         try:
             score = tracker.get_slot("score") or 0
-            total_response = requests.get("http://localhost:8000/api/count/1/count/", headers=get_auth_headers(tracker))
-
+            headers = get_auth_headers(tracker)
+            
+            # Get total questions
+            total_response = requests.get("http://localhost:8000/api/count/1/count/", headers=headers)
             total_response.raise_for_status()
             total_questions = total_response.json()["count"]
+
+            # Save the result to Django
+            save_response = requests.post(
+                f"http://localhost:8000/api/save_result/1/",
+                headers=headers,
+                json={
+                    "score": score,
+                    "total_questions": total_questions
+                }
+            )
+            
+            save_response.raise_for_status()
 
             percentage = (score / total_questions) * 100 if total_questions > 0 else 0
 
@@ -75,6 +88,7 @@ class ActionFetchQuestion(Action):
                 f"🎉 Exam Completed!\n\n"
                 f"Your score: {int(score)}/{total_questions}\n"
                 f"Percentage: {percentage:.1f}%\n\n"
+                f"Your result has been saved to your account."
             )
 
             if percentage >= 75:
@@ -91,10 +105,13 @@ class ActionFetchQuestion(Action):
                 Restarted()
             ]
 
+        except requests.exceptions.RequestException as e:
+            dispatcher.utter_message(text="❌ Couldn't save your exam results. Please contact support.")
+            print(f"API Error: {str(e)}")
         except Exception as e:
-            dispatcher.utter_message(text="❌ Couldn't calculate final score.")
-            print(f"Scoring Error: {str(e)}")
-            return []
+            dispatcher.utter_message(text="❌ An unexpected error occurred.")
+            print(f"Error: {str(e)}")
+        return []
 
 
 class ActionCheckAnswer(Action):
@@ -131,10 +148,10 @@ class ActionCheckAnswer(Action):
                 encouragements = [
                     "Don't worry, you'll get the next one! 💪",
                     "Keep going, you're learning! 📘",
-                    "Incorrect, but you’re doing great. Try again! 🎯",
-                    "Not quite, but don’t give up! 🚀"
+                    "Incorrect, but you're doing great. Try again! 🎯",
+                    "Not quite, but don't give up! 🚀"
                 ]
-                feedback = f"❌ Incorrect (Correct: {correct_option})\n{random.choice(encouragements)}"
+                feedback = f"❌ Incorrect\n{random.choice(encouragements)}"
 
             dispatcher.utter_message(text=f"{feedback}\nCurrent score: {int(new_score)}")
 

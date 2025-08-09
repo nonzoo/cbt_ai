@@ -1,10 +1,10 @@
+import requests
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Question
+from .models import Question, Exam, ExamSession
 from .serializers import QuestionSerializer
 from django.shortcuts import render, redirect
 from django.contrib import messages
-import requests
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
@@ -30,10 +30,11 @@ def login_view(request):
 
 @permission_classes([IsAuthenticated])
 def chat_view(request):
+    username = request.user.username
     token = request.GET.get('token', '')
-    return render(request, 'chat.html', {'token': token})
+    return render(request, 'chat.html', {'token': token, 'username': username})
 
-
+    
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def get_question(request, exam_id, question_num):
@@ -58,3 +59,26 @@ def check_answer(request, exam_id, question_num):
 def exam_question_count(request, exam_id):
     count = Question.objects.filter(exam_id=exam_id).count()
     return Response({"count": count})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def save_exam_result(request, exam_id):
+    try:
+        score = int(request.data.get("score"))
+        total_questions = int(request.data.get("total_questions"))
+        
+        # Create or update exam session
+        exam = Exam.objects.get(id=exam_id)
+        ExamSession.objects.update_or_create(
+            user=request.user,
+            exam=exam,
+            defaults={
+                'score': score,
+                'current_question': total_questions  # Mark as completed
+            }
+        )
+        
+        return Response({"status": "success"})
+    except Exception as e:
+        return Response({"error": str(e)}, status=400)
