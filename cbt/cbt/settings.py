@@ -31,6 +31,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'cbt.urls'
 
+LOGIN_URL = '/api/login/'
+LOGIN_REDIRECT_URL = '/api/chat/'
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

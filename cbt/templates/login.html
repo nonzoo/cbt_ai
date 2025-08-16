@@ -1,24 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Login</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login • DOU Exam Bot</title>
+
+  <!-- Tailwind + Font (same as chat page) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            brand: {
+              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+              800: '#1e40af', 900: '#1e3a8a'
+            }
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body>
-    <h2>Login</h2>
-    {% if messages %}
-        <ul>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        <label>Username:</label>
-        <input type="text" name="username" required><br>
-        <label>Password:</label>
-        <input type="password" name="password" required><br>
-        <button type="submit">Login</button>
-    </form>
+<body class="min-h-screen bg-gradient-to-br from-indigo-50 via-sky-50 to-cyan-50 flex items-center justify-center p-4 font-sans">
+
+  <div class="w-full max-w-md space-y-5">
+    <!-- Header card (matches chat header vibe) -->
+    <div class="relative overflow-hidden rounded-2xl bg-white/80 backdrop-blur shadow-lg ring-1 ring-indigo-100">
+      <div class="absolute inset-0 -z-10">
+        <svg class="w-full h-full opacity-60" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#93c5fd"/><stop offset="1" stop-color="#22d3ee"/>
+          </linearGradient></defs>
+          <circle cx="90" cy="70" r="60" fill="url(#g)" opacity="0.25"/>
+          <circle cx="300" cy="150" r="80" fill="url(#g)" opacity="0.2"/>
+          <circle cx="520" cy="60" r="70" fill="url(#g)" opacity="0.18"/>
+        </svg>
+      </div>
+      <div class="px-6 py-6 md:px-8">
+        <span class="inline-flex items-center gap-2 rounded-full bg-indigo-600/10 text-indigo-700 px-3 py-1 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+          DOU Exam Bot
+        </span>
+        <h1 class="mt-2 text-2xl font-bold text-slate-800">Welcome back</h1>
+        <p class="text-slate-600 mt-1">Sign in to continue to your exam chat.</p>
+      </div>
+    </div>
+
+    <!-- Login form card -->
+    <div class="rounded-2xl bg-white shadow-xl ring-1 ring-indigo-100 overflow-hidden">
+      <div class="px-6 py-6 md:px-8 md:py-7">
+        <!-- Django messages -->
+        {% if messages %}
+          <ul class="mb-4 space-y-2">
+            {% for message in messages %}
+              <li class="rounded-lg px-3 py-2 text-sm
+                {% if 'error' in message.tags %}
+                  bg-red-50 text-red-700 ring-1 ring-red-100
+                {% elif 'warning' in message.tags %}
+                  bg-amber-50 text-amber-800 ring-1 ring-amber-100
+                {% elif 'success' in message.tags %}
+                  bg-emerald-50 text-emerald-800 ring-1 ring-emerald-100
+                {% else %}
+                  bg-slate-50 text-slate-700 ring-1 ring-slate-100
+                {% endif %}
+              ">
+                {{ message }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Username</label>
+            <input
+              type="text"
+              name="username"
+              required
+              autocomplete="username"
+              class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-800 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+              placeholder="yourname"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-700 mb-1">Password</label>
+            <div class="relative">
+              <input
+                id="password"
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 pr-12 text-slate-800 placeholder-slate-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                id="toggle-password"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-700 px-2 py-1"
+                aria-label="Show password"
+                title="Show password"
+              >
+                👁️
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 text-white px-5 py-3 font-semibold shadow-sm hover:bg-slate-800 active:scale-[0.99] transition"
+          >
+            Login
+          </button>
+
+          <p class="text-xs text-slate-500 mt-2">
+            Tip: After login, you'll be redirected to the chat page automatically.
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('toggle-password');
+    const pwd = document.getElementById('password');
+    if (btn && pwd) {
+      btn.addEventListener('click', () => {
+        const isPw = pwd.type === 'password';
+        pwd.type = isPw ? 'text' : 'password';
+        btn.textContent = isPw ? '🙈' : '👁️';
+        btn.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
+        btn.setAttribute('title', isPw ? 'Hide password' : 'Show password');
+      });
+    }
+  </script>
 </body>
 </html>

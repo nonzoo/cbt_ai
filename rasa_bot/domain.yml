@@ -4,21 +4,47 @@ slots:
   jwt_token:
     type: text
     mappings:
-    - type: custom
+      - type: custom
   exam_id:
     type: text
     mappings:
-    - type: custom
+      - type: custom
+  # legacy; no longer needed for adaptive but safe to keep
   question_number:
     type: float
     initial_value: 0.0
     mappings:
-    - type: custom
+      - type: custom
   score:
     type: float
     initial_value: 0.0
     mappings:
-    - type: custom
+      - type: custom
+    influence_conversation: false
+
+  # NEW
+  question_id:
+    type: text
+    mappings:
+      - type: custom
+    influence_conversation: false
+  difficulty:
+    type: float
+    initial_value: 2.0
+    mappings:
+      - type: custom
+    influence_conversation: false
+  asked_count:
+    type: float
+    initial_value: 0.0
+    mappings:
+      - type: custom
+    influence_conversation: false
+  total_questions:
+    type: float
+    initial_value: 0.0
+    mappings:
+      - type: custom
     influence_conversation: false
 
 intents:
@@ -27,21 +53,16 @@ intents:
   - control_flow
   - greet
   - goodbye
-  
 
 actions:
   - action_fetch_question
   - action_check_answer
   - action_greet_and_prompt
-  # - utter_greet
-  # - utter_exam_complete
 
 responses:
-  # utter_greet:
-  #   - text: "Welcome to the DOU Exam Bot! Type 'start exam' to begin."
   utter_exam_complete:
     - text: "🎉 Exam completed! Check your score in Django."
-  utter_iamabot:  
+  utter_iamabot:
     - text: "I'm an exam assistance bot."
   utter_goodbye:
     - text: "Goodbye! Good luck with your studies!"
