@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 class Exam(models.Model):
     name = models.CharField(max_length=100)
+    duration_minutes = models.PositiveIntegerField(default=120) 
     def __str__(self):
         return self.name
 
@@ -33,6 +34,10 @@ class ExamSession(models.Model):
     incorrect_streak = models.PositiveSmallIntegerField(default=0)
     adaptive = models.BooleanField(default=True)
     pending_question_id = models.IntegerField(null=True, blank=True) 
+    started_at = models.DateTimeField(null=True, blank=True)
+    ends_at = models.DateTimeField(null=True, blank=True)
+    finished_at = models.DateTimeField(null=True, blank=True)
+    is_finished = models.BooleanField(default=False)
 
     # legacy count-based fields
     current_question = models.IntegerField(default=0)

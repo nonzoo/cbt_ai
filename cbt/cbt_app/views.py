@@ -1,5 +1,7 @@
-# views.py
 import random
+import requests
+from django.utils import timezone
+from datetime import timedelta
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from rest_framework.decorators import api_view, permission_classes
@@ -9,7 +11,7 @@ from .models import Question, Exam, ExamSession
 from .serializers import QuestionSerializer
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
-import requests
+
 
 BACKEND_LOGIN_URL = 'http://localhost:8000/api/token/'
 
@@ -54,7 +56,16 @@ def adaptive_next_question(request, exam_id: int):
         user=request.user, exam=exam,
         defaults={'current_difficulty': 2, 'adaptive': True}
     )
-
+    if session.started_at and session.ends_at and _now() >= session.ends_at:
+        # time is up → finalize and stop
+        summary = _finalize_session(session)
+        return Response({
+            "done": True,
+            "time_up": True,
+            "message": "Time is up.",
+            "total_questions": summary["total_questions"],
+            "score": summary["score"],
+        }, status=200)
     total_questions = Question.objects.filter(exam=exam).count()
 
     # ✅ If there is a pending question, re-serve it
@@ -102,6 +113,7 @@ def adaptive_next_question(request, exam_id: int):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def adaptive_check_answer(request):
+    
     exam_id = int(request.data.get("exam_id"))
     question_id = int(request.data.get("question_id"))
     user_answer = int(request.data.get("answer"))
@@ -112,7 +124,16 @@ def adaptive_check_answer(request):
         user=request.user, exam=exam,
         defaults={'current_difficulty': 2, 'adaptive': True}
     )
-
+    if session.started_at and session.ends_at and _now() >= session.ends_at:
+        # time is up → finalize and stop
+        summary = _finalize_session(session)
+        return Response({
+            "done": True,
+            "time_up": True,
+            "message": "Time is up.",
+            "total_questions": summary["total_questions"],
+            "score": summary["score"],
+        }, status=200)
     total_questions = Question.objects.filter(exam=exam).count()
 
     is_correct = (user_answer == q.correct_option)
@@ -146,6 +167,7 @@ def adaptive_check_answer(request):
     }, status=200)
 
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def save_exam_result(request, exam_id):
@@ -161,7 +183,94 @@ def save_exam_result(request, exam_id):
         return Response({"status": "success"})
     except Exception as e:
         return Response({"error": str(e)}, status=400)
+    
+def _now():
+    return timezone.now()
 
+def _remaining_seconds(session: ExamSession) -> int:
+    """Server-authoritative remaining seconds (never negative)."""
+    if not session.started_at or not session.ends_at:
+        return 0
+    return max(0, int((session.ends_at - _now()).total_seconds()))
+
+def _finalize_session(session: ExamSession) -> dict:
+    """Mark finished and return summary payload."""
+    if session.is_finished:
+        # already finalized
+        pass
+    else:
+        session.is_finished = True
+        session.finished_at = _now()
+        # mark position as complete
+        session.current_question = len(session.asked_question_ids)
+        session.save()
+    total = Question.objects.filter(exam=session.exam).count()
+    return {
+        "status": "finalized",
+        "score": session.score,
+        "total_questions": total,
+        "finished_at": session.finished_at,
+    }
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def adaptive_begin(request, exam_id: int):
+    """
+    Start exam timer if it hasn't started. Idempotent.
+    Returns: { started_at, ends_at, remaining_seconds }
+    """
+    exam = Exam.objects.get(id=exam_id)
+    session, _ = ExamSession.objects.get_or_create(
+        user=request.user, exam=exam,
+        defaults={'current_difficulty': 2, 'adaptive': True}
+    )
+    if not session.started_at or not session.ends_at:
+        session.started_at = _now()
+        session.ends_at = session.started_at + timedelta(minutes=exam.duration_minutes)
+        session.save()
+    return Response({
+        "started_at": session.started_at,
+        "ends_at": session.ends_at,
+        "remaining_seconds": _remaining_seconds(session),
+        "duration_minutes": exam.duration_minutes,
+        "is_finished": session.is_finished,
+    }, status=200)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def adaptive_status(request, exam_id: int):
+    """
+    Status for header: pending + remaining_seconds.
+    """
+    exam = Exam.objects.get(id=exam_id)
+    session, _ = ExamSession.objects.get_or_create(
+        user=request.user, exam=exam,
+        defaults={'current_difficulty': 2, 'adaptive': True}
+    )
+    total = Question.objects.filter(exam=exam).count()
+    pending = bool(session.pending_question_id)
+    remaining = _remaining_seconds(session) if session.started_at else 0
+    return Response({
+        "pending": pending,
+        "pending_question_id": session.pending_question_id,
+        "asked_count": len(session.asked_question_ids) + (1 if pending else 0),
+        "total_questions": total,
+        "current_difficulty": session.current_difficulty,
+        "started": bool(session.started_at),
+        "remaining_seconds": remaining,
+        "is_finished": session.is_finished,
+    }, status=200)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def adaptive_finalize(request, exam_id: int):
+    """
+    Force finalize (used by frontend when timer hits 0).
+    """
+    exam = Exam.objects.get(id=exam_id)
+    session = ExamSession.objects.get(user=request.user, exam=exam)
+    summary = _finalize_session(session)
+    return Response(summary, status=200)
 
 
 

@@ -9,6 +9,9 @@ urlpatterns = [
     path('adaptive/next/<int:exam_id>/', views.adaptive_next_question),
     path('adaptive/check_answer/', views.adaptive_check_answer),
     path('save_result/<int:exam_id>/', views.save_exam_result),
+    path('adaptive/begin/<int:exam_id>/', views.adaptive_begin),
+    path('adaptive/status/<int:exam_id>/', views.adaptive_status),
+    path('adaptive/finalize/<int:exam_id>/', views.adaptive_finalize),
  
 ]
     # classic
