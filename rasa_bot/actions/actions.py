@@ -30,7 +30,6 @@ class ActionFetchQuestion(Action):
             data = r.json()
 
             if data.get("done"):
-                # Do NOT call a removed method; just inform & reset.
                 msg = data.get("message") or "Exam complete."
                 dispatcher.utter_message(text=f"🎉 {msg}")
                 return [
@@ -38,8 +37,8 @@ class ActionFetchQuestion(Action):
                     SlotSet("asked_count", 0.0),
                     SlotSet("total_questions", float(data.get("total_questions", 0)) if data.get("total_questions") is not None else 0.0),
                     SlotSet("difficulty", 2.0),
-                    SlotSet("question_number", 0.0),
-                    # do not reset score here; ActionCheckAnswer handles final saving/summary
+                    # SlotSet("question_number", 0.0),
+                    
                 ]
 
             q = data["question"]
@@ -158,7 +157,7 @@ class ActionCheckAnswer(Action):
                     SlotSet("difficulty", 2.0),
                     SlotSet("asked_count", 0.0),
                     SlotSet("total_questions", 0.0),
-                    SlotSet("question_number", 0.0),
+                    # SlotSet("question_number", 0.0),
                     Restarted(),
                 ]
 

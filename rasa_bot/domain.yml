@@ -9,12 +9,6 @@ slots:
     type: text
     mappings:
       - type: custom
-  # legacy; no longer needed for adaptive but safe to keep
-  question_number:
-    type: float
-    initial_value: 0.0
-    mappings:
-      - type: custom
   score:
     type: float
     initial_value: 0.0
@@ -22,7 +16,6 @@ slots:
       - type: custom
     influence_conversation: false
 
-  # NEW
   question_id:
     type: text
     mappings:
@@ -53,6 +46,7 @@ intents:
   - control_flow
   - greet
   - goodbye
+  - thank_you
 
 actions:
   - action_fetch_question
@@ -66,3 +60,5 @@ responses:
     - text: "I'm an exam assistance bot."
   utter_goodbye:
     - text: "Goodbye! Good luck with your studies!"
+  utter_welcome:
+    - text: "You're welcome!"

@@ -49,7 +49,6 @@ def _next_difficulty(current: int, got_it_right: bool) -> int:
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def adaptive_next_question(request, exam_id: int):
-   
     exam = Exam.objects.get(id=exam_id)
     session, _ = ExamSession.objects.get_or_create(
         user=request.user, exam=exam,
@@ -58,34 +57,47 @@ def adaptive_next_question(request, exam_id: int):
 
     total_questions = Question.objects.filter(exam=exam).count()
 
-    asked_count = len(session.asked_question_ids)
-    if asked_count >= total_questions:
-        return Response({"done": True, "message": "Exam complete.", "total_questions": total_questions}, status=200)
+    # ✅ If there is a pending question, re-serve it
+    if session.pending_question_id:
+        try:
+            q = Question.objects.get(id=session.pending_question_id, exam=exam)
+            serializer = QuestionSerializer(q)
+            return Response({
+                "done": False,
+                "question": serializer.data,
+                "asked_count": len(session.asked_question_ids) + 1,  # show position incl. current
+                "total_questions": total_questions,
+                "current_difficulty": session.current_difficulty
+            }, status=200)
+        except Question.DoesNotExist:
+            # stale id; clear and continue
+            session.pending_question_id = None
+            session.save()
 
-    # Pool: same difficulty first, fallback to any unanswered
+    # No pending: choose a new one
     base_qs = Question.objects.filter(exam=exam).exclude(id__in=session.asked_question_ids)
     pool = base_qs.filter(difficulty=session.current_difficulty)
     if not pool.exists():
         pool = base_qs
 
     if not pool.exists():
-        return Response({"done": True, "message": "No more questions.", "total_questions": total_questions}, status=200)
+        # nothing left
+        return Response({"done": True, "message": "Exam complete.", "total_questions": total_questions}, status=200)
 
-    question = random.choice(list(pool))
-
-    # mark as asked
-    session.asked_question_ids = session.asked_question_ids + [question.id]
-    session.current_question = len(session.asked_question_ids)
+    q = random.choice(list(pool))
+    session.pending_question_id = q.id  # mark as pending (not yet asked)
     session.save()
 
-    serializer = QuestionSerializer(question)
+    serializer = QuestionSerializer(q)
     return Response({
         "done": False,
         "question": serializer.data,
-        "asked_count": session.current_question,
+        "asked_count": len(session.asked_question_ids) + 1,  # position incl. current
         "total_questions": total_questions,
         "current_difficulty": session.current_difficulty
     }, status=200)
+
+# views.py (replace adaptive_check_answer with this version)
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -112,19 +124,27 @@ def adaptive_check_answer(request):
         session.incorrect_streak += 1
         session.correct_streak = 0
 
+    # Commit the question as answered and clear the pending session
+    if q.id not in session.asked_question_ids:
+        session.asked_question_ids = session.asked_question_ids + [q.id]
+    session.pending_question_id = None
+
+    # Step difficulty
     session.current_difficulty = _next_difficulty(session.current_difficulty, is_correct)
     session.save()
 
     done = len(session.asked_question_ids) >= total_questions
+
     return Response({
         "is_correct": is_correct,
         "correct_answer": q.correct_option,
         "score": session.score,
-        "asked_count": len(session.asked_question_ids),
-        "total_questions": total_questions,           
+        "asked_count": len(session.asked_question_ids),   # answered so far
+        "total_questions": total_questions,
         "current_difficulty": session.current_difficulty,
         "done": done
     }, status=200)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])

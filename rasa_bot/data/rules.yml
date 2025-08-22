@@ -11,3 +11,8 @@ rules:
   steps:
   - intent: bot_challenge
   - action: utter_iamabot
+
+- rule: Say you are welcome anytime the user says thank you
+  steps:
+  - intent: thank_you
+  - action: utter_welcome

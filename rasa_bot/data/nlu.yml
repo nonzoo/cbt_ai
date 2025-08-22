@@ -40,6 +40,16 @@ nlu:
     - That's all
     - End session
 
+
+- intent: thank_you
+  examples: |
+    - Thank you
+    - Thanks
+    - I appreciate it
+    - Much obliged
+    - Cheers
+    - Thanks a lot
+
 # - intent: affirm
 #   examples: |
 #     - Yes
