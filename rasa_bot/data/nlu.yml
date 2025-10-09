@@ -3,13 +3,62 @@ version: "3.1"
 nlu:
 - intent: start_exam
   examples: |
-    - I want to start the exam
-    - Begin test
-    - Start exam
-    - Can I take the test now?
-    - Ready for my exam
-    - Let's begin the quiz
-    - I'd like to start the MCQ test
+    - "Start exam"
+    - "Begin test"
+    - "Commence the exam"
+    - "Initiate the test"
+    - "Open the exam"
+    - "Launch the exam"
+    - "Begin the exam"
+    - "Start the test"
+    - "Commence test"
+    - "Initiate exam"
+    - "Open test"
+    - "Launch test"
+    - "Commence the test"
+    - "Initiate the exam"
+    - "Open the test"
+    - "Launch the exam"
+    - "Let's start the exam"
+    - "Please start the exam"
+    - "Can we begin the test?"
+    - "I want to start the exam"
+    - "Begin the test now"
+    - "Start the exam now"
+    - "Commence the test now"
+    - "Initiate the exam now"
+    - "Open the exam now"
+    - "Launch the exam now"
+    - "I'm ready to start the exam"
+    - "Let's begin the test"
+    - "Start my exam now"
+    - "Can I start my test?"
+    - "Please begin the quiz"
+    - "Start the paper"
+    - "I want to start the exam"
+    - "Launch the test section"
+    - "Begin my assessment"
+    - "Let's get started"
+    - "Time to take my exam"
+    - "I'm ready for the quiz"
+    - "Open the exam now"
+    - "Let's kick off the test"
+    - "Begin my test"
+    - "Activate the exam"
+    - "Can you start my test?"
+    - "Please open the question section"
+    - "Start the first question"
+    - "Start the test session"
+    - "Begin the mock test"
+    - "I'm ready to take the paper"
+    - "I want to write the test now"
+    - "Please begin my examination"
+    - "Start the objective test"
+    - "Open my exam interface"
+    - "Start my quiz right away"
+    - "Let's start answering"
+    - "I'm ready to begin now"
+    - "Kickstart the exam please"
 
 - intent: answer_question
   examples: |
@@ -20,35 +69,121 @@ nlu:
 
 - intent: greet
   examples: |
-    - Hi
-    - Hello
-    - Hey
-    - Good morning
-    - Good afternoon
-    - What's up?
-    - How are you?
-    - Greetings
+    - "Hi"
+    - "Hello"
+    - "Hey there"
+    - "Good morning"
+    - "Good afternoon"
+    - "Good night" 
+    - "Good evening"
+    - "Hey"
+    - "Hi there"
+    - "Hello bot"
+    - "Hey buddy"
+    - "Hi friend"
+    - "Greetings"
+    - "What's up?"
+    - "How's it going?"
+    - "Yo"
+    - "Hey assistant"
+    - "Hello friend"
+    - "Nice to see you"
+    - "Hi, how are you?"
+    - "Hey, what's new?"
+    - "Hi chatbot"
+    - "Good day"
+    - "Hey there, how are you?"
+    - "Howdy"
+    - "Hello there"
+    - "Hi again"
+    - "Yo bot"
+    - "Hi, good to see you"
+    - "Hey hey"
+    - "Hello, can you hear me?"
+
 
 - intent: goodbye
   examples: |
-    - Bye
-    - Goodbye
-    - See you later
-    - Quit
-    - Exit
-    - I'm done
-    - That's all
-    - End session
+    - "Goodbye"
+    - "Bye"
+    - "See you later"
+    - "Talk to you soon"
+    - "Catch you later"
+    - "Bye bye"
+    - "I'm done for now"
+    - "That's all for today"
+    - "End session"
+    - "I'm finished"
+    - "See you next time"
+    - "I'll come back later"
+    - "I'm logging out"
+    - "I'm done here"
+    - "That's enough for now"
+    - "Alright, bye"
+    - "Talk later"
+    - "Thanks, goodbye"
+    - "Catch you later on"
+    - "I'll be back soon"
+    - "I'm leaving"
+    - "Exit the session"
+    - "Bye for now"
+    - "We'll talk later"
+    - "End the chat"
+    - "Closing now"
+    - "That's it for me"
+    - "We're done here"
+    - "Good night"
+    - "Later"
 
 
 - intent: thank_you
   examples: |
-    - Thank you
-    - Thanks
-    - I appreciate it
-    - Much obliged
-    - Cheers
-    - Thanks a lot
+    - "Thanks"
+    - "Thank you"
+    - "Thanks a lot"
+    - "I really appreciate it"
+    - "Appreciate your help"
+    - "Thank you so much"
+    - "Many thanks"
+    - "Thanks a million"
+    - "Thanks for your assistance"
+    - "Thank you very much"
+    - "Thanks for your support"
+    - "Thank you kindly"
+    - "Thanks a ton"
+    - "Thank you for your help"
+    - "Thanks, I appreciate it"
+    - "Thank you, that was helpful"
+    - "Thanks for everything"
+    - "Thank you, I appreciate it"
+    - "Thanks for your time"
+    - "Thank you for your support"
+    - "Thanks a lot for your help"
+    - "Thank you for assisting me"
+    - "You're the best"
+    - "Thanks for the support"
+    - "That was helpful"
+    - "Much appreciated"
+    - "Thanks a bunch"
+    - "Thanks again"
+    - "You helped me a lot"
+    - "I'm grateful"
+    - "Thank you for your time"
+    - "You did great"
+    - "I appreciate your effort"
+    - "That helped"
+    - "You're amazing, thanks"
+    - "I owe you one"
+    - "That was kind of you"
+    - "Appreciate that"
+    - "Big thanks"
+    - "Thanks for explaining"
+    - "Thank you very much"
+    - "Thanks for your help"
+    - "You've been so helpful"
+    - "I'm thankful"
+    - "Really appreciate that"
+    - "Many thanks"
 
 # - intent: affirm
 #   examples: |

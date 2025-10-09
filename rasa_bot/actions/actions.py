@@ -45,7 +45,7 @@ class ActionFetchQuestion(Action):
             options = {'A': q["option1"], 'B': q["option2"], 'C': q["option3"], 'D': q["option4"]}
             diff_map = {1: "Easy", 2: "Medium", 3: "Hard"}
             question_text = (
-                f"({diff_map.get(int(data['current_difficulty']), 'Medium')}) "
+                # f"({diff_map.get(int(data['current_difficulty']), 'Medium')}) "
                 f"Question {int(data['asked_count'])}/{int(data['total_questions'])}:\n"
                 f"{q['text']}\n\n" + "\n".join([f"{k}. {v}" for k, v in options.items()])
             )
@@ -115,7 +115,7 @@ class ActionCheckAnswer(Action):
                 feedback = f"❌ Incorrect. The correct answer was {correct_option}.\n{random.choice(encouragements)}"
 
             dispatcher.utter_message(
-                text=f"{feedback}\nCurrent score: {int(new_score)} | Next difficulty: {int(result.get('current_difficulty', 2))}"
+                text=f"{feedback}\nCurrent score: {int(new_score)}"
             )
 
             # If done, finalize & reset here using the *local* new_score (prevents off-by-one errors)

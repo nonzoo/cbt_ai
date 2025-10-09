@@ -1,3 +1,4 @@
+#cbt_app/views.py
 import random
 import requests
 from django.utils import timezone
@@ -41,8 +42,6 @@ def chat_view(request):
     return render(request, 'chat.html', {'token': token, 'username': username})
 
 
-
-
 def _next_difficulty(current: int, got_it_right: bool) -> int:
     if got_it_right:
         return min(3, current + 1)
@@ -68,7 +67,7 @@ def adaptive_next_question(request, exam_id: int):
         }, status=200)
     total_questions = Question.objects.filter(exam=exam).count()
 
-    # ✅ If there is a pending question, re-serve it
+    #If there is a pending question, re-serve it
     if session.pending_question_id:
         try:
             q = Question.objects.get(id=session.pending_question_id, exam=exam)
@@ -76,7 +75,7 @@ def adaptive_next_question(request, exam_id: int):
             return Response({
                 "done": False,
                 "question": serializer.data,
-                "asked_count": len(session.asked_question_ids) + 1,  # show position incl. current
+                "asked_count": len(session.asked_question_ids) + 1,  
                 "total_questions": total_questions,
                 "current_difficulty": session.current_difficulty
             }, status=200)
@@ -90,25 +89,23 @@ def adaptive_next_question(request, exam_id: int):
     pool = base_qs.filter(difficulty=session.current_difficulty)
     if not pool.exists():
         pool = base_qs
-
-    if not pool.exists():
-        # nothing left
         return Response({"done": True, "message": "Exam complete.", "total_questions": total_questions}, status=200)
-
+    
+        
     q = random.choice(list(pool))
-    session.pending_question_id = q.id  # mark as pending (not yet asked)
+    session.pending_question_id = q.id 
     session.save()
 
     serializer = QuestionSerializer(q)
     return Response({
         "done": False,
         "question": serializer.data,
-        "asked_count": len(session.asked_question_ids) + 1,  # position incl. current
+        "asked_count": len(session.asked_question_ids) + 1,  
         "total_questions": total_questions,
         "current_difficulty": session.current_difficulty
     }, status=200)
 
-# views.py (replace adaptive_check_answer with this version)
+
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
@@ -160,7 +157,7 @@ def adaptive_check_answer(request):
         "is_correct": is_correct,
         "correct_answer": q.correct_option,
         "score": session.score,
-        "asked_count": len(session.asked_question_ids),   # answered so far
+        "asked_count": len(session.asked_question_ids),  
         "total_questions": total_questions,
         "current_difficulty": session.current_difficulty,
         "done": done
@@ -183,12 +180,12 @@ def save_exam_result(request, exam_id):
         return Response({"status": "success"})
     except Exception as e:
         return Response({"error": str(e)}, status=400)
-    
+
+#MY CBT time module
 def _now():
     return timezone.now()
 
 def _remaining_seconds(session: ExamSession) -> int:
-    """Server-authoritative remaining seconds (never negative)."""
     if not session.started_at or not session.ends_at:
         return 0
     return max(0, int((session.ends_at - _now()).total_seconds()))
@@ -196,12 +193,10 @@ def _remaining_seconds(session: ExamSession) -> int:
 def _finalize_session(session: ExamSession) -> dict:
     """Mark finished and return summary payload."""
     if session.is_finished:
-        # already finalized
         pass
     else:
         session.is_finished = True
         session.finished_at = _now()
-        # mark position as complete
         session.current_question = len(session.asked_question_ids)
         session.save()
     total = Question.objects.filter(exam=session.exam).count()
@@ -216,8 +211,7 @@ def _finalize_session(session: ExamSession) -> dict:
 @permission_classes([IsAuthenticated])
 def adaptive_begin(request, exam_id: int):
     """
-    Start exam timer if it hasn't started. Idempotent.
-    Returns: { started_at, ends_at, remaining_seconds }
+    Start exam timer if it hasn't started
     """
     exam = Exam.objects.get(id=exam_id)
     session, _ = ExamSession.objects.get_or_create(
