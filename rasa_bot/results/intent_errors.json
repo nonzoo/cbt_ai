@@ -1,66 +1,18 @@
 [
   {
-    "text": "\"You're the best\"",
-    "intent": "thank_you",
+    "text": "\"I'm finished\"",
+    "intent": "goodbye",
     "intent_prediction": {
-      "name": "start_exam",
-      "confidence": 0.9998062252998352
-    }
-  },
-  {
-    "text": "\"I owe you one\"",
-    "intent": "thank_you",
-    "intent_prediction": {
-      "name": "goodbye",
-      "confidence": 0.9999653100967407
-    }
-  },
-  {
-    "text": "\"Greetings\"",
-    "intent": "greet",
-    "intent_prediction": {
-      "name": "thank_you",
-      "confidence": 0.9479165077209473
+      "name": "greet",
+      "confidence": 0.4643804728984833
     }
   },
   {
     "text": "\"See you next time\"",
     "intent": "goodbye",
     "intent_prediction": {
-      "name": "thank_you",
-      "confidence": 0.9761946797370911
-    }
-  },
-  {
-    "text": "\"Good night\"",
-    "intent": "greet",
-    "intent_prediction": {
-      "name": "goodbye",
-      "confidence": 1.0
-    }
-  },
-  {
-    "text": "\"That's it for me\"",
-    "intent": "goodbye",
-    "intent_prediction": {
-      "name": "thank_you",
-      "confidence": 0.9775422811508179
-    }
-  },
-  {
-    "text": "\"Good afternoon\"",
-    "intent": "greet",
-    "intent_prediction": {
-      "name": "goodbye",
-      "confidence": 0.995835542678833
-    }
-  },
-  {
-    "text": "\"I'm finished\"",
-    "intent": "goodbye",
-    "intent_prediction": {
-      "name": "start_exam",
-      "confidence": 0.9283167719841003
+      "name": "greet",
+      "confidence": 0.8595234155654907
     }
   },
   {
@@ -68,39 +20,23 @@
     "intent": "goodbye",
     "intent_prediction": {
       "name": "greet",
-      "confidence": 0.9343881607055664
+      "confidence": 0.667875349521637
     }
   },
   {
-    "text": "\"You did great\"",
+    "text": "\"You're the best\"",
     "intent": "thank_you",
     "intent_prediction": {
-      "name": "greet",
-      "confidence": 0.5623728632926941
+      "name": "start_exam",
+      "confidence": 0.9999982118606567
     }
   },
   {
-    "text": "\"Nice to see you\"",
-    "intent": "greet",
+    "text": "\"I owe you one\"",
+    "intent": "thank_you",
     "intent_prediction": {
       "name": "goodbye",
-      "confidence": 0.9808299541473389
-    }
-  },
-  {
-    "text": "\"Thanks, goodbye\"",
-    "intent": "goodbye",
-    "intent_prediction": {
-      "name": "thank_you",
-      "confidence": 0.9999984502792358
-    }
-  },
-  {
-    "text": "\"Exit the session\"",
-    "intent": "goodbye",
-    "intent_prediction": {
-      "name": "start_exam",
-      "confidence": 0.7522724270820618
+      "confidence": 0.9999998807907104
     }
   },
   {
@@ -112,11 +48,59 @@
     }
   },
   {
-    "text": "\"I'm grateful\"",
-    "intent": "thank_you",
+    "text": "\"Good afternoon\"",
+    "intent": "greet",
     "intent_prediction": {
       "name": "goodbye",
-      "confidence": 0.9990615248680115
+      "confidence": 0.9967343807220459
+    }
+  },
+  {
+    "text": "\"I'm done here\"",
+    "intent": "goodbye",
+    "intent_prediction": {
+      "name": "greet",
+      "confidence": 0.9995660185813904
+    }
+  },
+  {
+    "text": "\"End the chat\"",
+    "intent": "goodbye",
+    "intent_prediction": {
+      "name": "greet",
+      "confidence": 0.5602444410324097
+    }
+  },
+  {
+    "text": "\"We're done here\"",
+    "intent": "goodbye",
+    "intent_prediction": {
+      "name": "greet",
+      "confidence": 0.9763362407684326
+    }
+  },
+  {
+    "text": "\"Good night\"",
+    "intent": "greet",
+    "intent_prediction": {
+      "name": "goodbye",
+      "confidence": 1.0
+    }
+  },
+  {
+    "text": "\"Talk to you soon\"",
+    "intent": "goodbye",
+    "intent_prediction": {
+      "name": "thank_you",
+      "confidence": 0.5923244953155518
+    }
+  },
+  {
+    "text": "\"Thanks, goodbye\"",
+    "intent": "goodbye",
+    "intent_prediction": {
+      "name": "thank_you",
+      "confidence": 0.9999996423721313
     }
   }
 ]

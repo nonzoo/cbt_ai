@@ -22,7 +22,7 @@ class ActionFetchQuestion(Action):
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         try:
-            exam_id = tracker.get_slot("exam_id") or "1"
+            exam_id = tracker.get_slot("exam_id") or "2"
             headers = get_auth_headers(tracker)
 
             r = requests.get(f"{API_BASE}/adaptive/next/{exam_id}/", headers=headers, timeout=10)
@@ -78,7 +78,7 @@ class ActionCheckAnswer(Action):
                 dispatcher.utter_message(text="⚠️ Please respond with only A, B, C, or D")
                 return []
 
-            exam_id = tracker.get_slot("exam_id") or "1"
+            exam_id = tracker.get_slot("exam_id") or "2"
             question_id = tracker.get_slot("question_id")
             if not question_id:
                 dispatcher.utter_message(text="⚠️ I couldn't find the current question. Say 'start exam' to begin.")
