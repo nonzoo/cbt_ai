@@ -263,327 +263,303 @@
     </div>
 
     <script>
-      const TYPE_DELAY_MS = 8;
+  const TYPE_DELAY_MS = 8;
 
-      const token = "{{ token }}";
-      const params = new URLSearchParams(window.location.search);
-      const examId = params.get("exam_id");
-      const chatBox = document.getElementById("chat-box");
-      const form = document.getElementById("chat-form");
-      const input = document.getElementById("message-input");
-      const startBtn = document.getElementById("start-btn");
-      const timerEl = document.getElementById("exam-timer");
+  const token = "{{ token }}";
+  const params = new URLSearchParams(window.location.search);
+  const examId = params.get("exam_id");
+  const chatBox = document.getElementById("chat-box");
+  const form = document.getElementById("chat-form");
+  const input = document.getElementById("message-input");
+  const startBtn = document.getElementById("start-btn");
+  const timerEl = document.getElementById("exam-timer");
 
-      let countdownInterval = null;
-      let remainingSecs = 0;
+  let countdownInterval = null;
+  let remainingSecs = 0;
 
-      function fmtHMS(totalSeconds) {
-        const s = Math.max(0, totalSeconds | 0);
-        const h = Math.floor(s / 3600);
-        const m = Math.floor((s % 3600) / 60);
-        const sec = s % 60;
-        return [h, m, sec].map((n) => String(n).padStart(2, "0")).join(":");
-      }
+  function fmtHMS(totalSeconds) {
+    const s = Math.max(0, totalSeconds | 0);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return [h, m, sec].map((n) => String(n).padStart(2, "0")).join(":");
+  }
 
-      function updateTimerUI() {
-        if (!timerEl) return;
-        timerEl.textContent = `⏳ ${fmtHMS(remainingSecs)}`;
-        if (remainingSecs <= 120) {
-          timerEl.classList.remove("bg-slate-900");
-          timerEl.classList.add("bg-red-600");
-        } else {
-          timerEl.classList.remove("bg-red-600");
-          timerEl.classList.add("bg-slate-900");
-        }
-      }
+  function updateTimerUI() {
+    if (!timerEl) return;
+    timerEl.textContent = `⏳ ${fmtHMS(remainingSecs)}`;
+    if (remainingSecs <= 120) {
+      timerEl.classList.remove("bg-slate-900");
+      timerEl.classList.add("bg-red-600");
+    } else {
+      timerEl.classList.remove("bg-red-600");
+      timerEl.classList.add("bg-slate-900");
+    }
+  }
 
-      function stopCountdown() {
-        if (countdownInterval) {
-          clearInterval(countdownInterval);
-          countdownInterval = null;
-        }
-      }
+  function stopCountdown() {
+    if (countdownInterval) {
+      clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  }
 
-      async function finalizeAndLogout() {
-        try {
-          const id = examId || localStorage.getItem("exam_id") || "1";
-          await fetch(`/api/adaptive/finalize/${id}/`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          });
-        } catch (e) {}
-        try {
-          localStorage.removeItem("access_token");
-        } catch (_) {}
-        // return to login after time up
-        window.location.href = "/api/login/";
-      }
+  async function finalizeAndLogout() {
+    try {
+      const id = examId || localStorage.getItem("exam_id") || "2";
+      await fetch(`/api/adaptive/finalize/${id}/`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (e) {}
+    try {
+      localStorage.removeItem("access_token");
+    } catch (_) {}
+    window.location.href = "/api/login/";
+  }
 
-      function startCountdownFrom(seconds) {
-        remainingSecs = Math.max(0, seconds | 0);
+  function startCountdownFrom(seconds) {
+    remainingSecs = Math.max(0, seconds | 0);
+    stopCountdown();
+    updateTimerUI();
+    countdownInterval = setInterval(async () => {
+      remainingSecs -= 1;
+      updateTimerUI();
+      if (remainingSecs <= 0) {
         stopCountdown();
-        updateTimerUI();
-        countdownInterval = setInterval(async () => {
-          remainingSecs -= 1;
-          updateTimerUI();
-          if (remainingSecs <= 0) {
-            stopCountdown();
-            await appendBotAnimated("⏰ Time is up. Finalizing your exam…");
-            await finalizeAndLogout();
-          }
-        }, 1000);
+        await appendBotAnimated("⏰ Time is up. Finalizing your exam…");
+        await finalizeAndLogout();
       }
+    }, 1000);
+  }
 
-      async function beginExamTimer() {
-        const id = examId || localStorage.getItem("exam_id") || "1";
-        try {
-          const res = await fetch(`/api/adaptive/begin/${id}/`, {
-            method: "POST",
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!res.ok) return;
-          const data = await res.json();
-          startCountdownFrom(data.remaining_seconds ?? 0);
-          // keep exam id handy across reloads
-          localStorage.setItem("exam_id", id);
-        } catch (e) {}
+  async function beginExamTimer() {
+    const id = examId || localStorage.getItem("exam_id") || "2";
+    try {
+      const res = await fetch(`/api/adaptive/begin/${id}/`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      startCountdownFrom(data.remaining_seconds ?? 0);
+      localStorage.setItem("exam_id", id);
+    } catch (e) {}
+  }
+
+  // Greet on load
+  appendBotAnimated(
+    "👋 Hello! Welcome to the DOU Exam Bot.\nWhen you're ready, click the button above to begin."
+  );
+
+  // Click event for Start Exam button
+  startBtn.addEventListener("click", () => {
+    startBtn.disabled = true;
+    beginExamTimer();
+    sendMessage("start exam").finally(() =>
+      setTimeout(() => (startBtn.disabled = true), 800)
+    );
+  });
+
+  async function syncTimerFromStatus() {
+    const id = examId || localStorage.getItem("exam_id") || "2";
+    try {
+      const res = await fetch(`/api/adaptive/status/${id}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.is_finished) {
+        await appendBotAnimated("✅ Exam already finalized.");
+        await finalizeAndLogout();
+        return;
       }
+      if (data.started) {
+        startCountdownFrom(data.remaining_seconds || 0);
+      }
+    } catch (e) {}
+  }
 
-      // greet on load
-      appendBotAnimated(
-        "👋 Hello! Welcome to the DOU Exam Bot.\nWhen you're ready, click the button above to begin."
+  syncTimerFromStatus();
+  window.addEventListener("focus", syncTimerFromStatus);
+
+  function appendUser(text) {
+    const div = document.createElement("div");
+    div.className = "user-msg";
+    div.textContent = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function makeLoaderBubble() {
+    const div = document.createElement("div");
+    div.className = "bot-msg";
+    const wrap = document.createElement("div");
+    wrap.className = "typing";
+    wrap.innerHTML =
+      '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+    div.appendChild(wrap);
+    return div;
+  }
+
+  function splitOptionsFromText(text) {
+    const lines = text.split(/\r?\n/);
+    const opts = [],
+      stem = [];
+    for (const l of lines) {
+      if (/^\s*[A-D]\.\s+/.test(l)) opts.push(l.trim());
+      else stem.push(l);
+    }
+    return { stem: stem.join("\n").trim(), opts };
+  }
+
+  function buildOptionsList(opts) {
+    const ul = document.createElement("ul");
+    ul.className = "options";
+    opts.forEach((line) => {
+      const m = line.match(/^\s*([A-D])\.\s+(.+)$/);
+      if (!m) return;
+      const li = document.createElement("li");
+      li.dataset.letter = m[1];
+      li.innerHTML = `<strong>${m[1]}.</strong> ${escapeHtml(m[2])}`;
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+
+  function escapeHtml(str) {
+    return str.replace(
+      /[&<>"]/g,
+      (s) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[s])
+    );
+  }
+
+  function typeText(el, text) {
+    return new Promise((resolve) => {
+      let i = 0,
+        cancelled = false;
+      const finish = () => {
+        el.textContent = text;
+        resolve();
+      };
+      el.addEventListener(
+        "click",
+        () => {
+          cancelled = true;
+          finish();
+        },
+        { once: true }
       );
-
-      startBtn.addEventListener("click", () => {
-        startBtn.disabled = true;
-        beginExamTimer();
-        sendMessage("start exam").finally(() =>
-          setTimeout(() => (startBtn.disabled = false), 800)
-        );
-      });
-
-      // Also handle when user TYPES "start exam"
-      async function sendMessage(message) {
-        appendUser(message);
-
-        // If user typed start exam, begin timer before asking Rasa
-        if (message.trim().toLowerCase() === "start exam") {
-          beginExamTimer();
+      const tick = () => {
+        if (cancelled) return;
+        if (i >= text.length) {
+          resolve();
+          return;
         }
-      }
-
-      async function syncTimerFromStatus() {
-        const id = examId || localStorage.getItem("exam_id") || "1";
-        try {
-          const res = await fetch(`/api/adaptive/status/${id}/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!res.ok) return;
-          const data = await res.json();
-          if (data.is_finished) {
-            // already finished — send to login
-            await appendBotAnimated("✅ Exam already finalized.");
-            await finalizeAndLogout();
-            return;
-          }
-          if (data.started) {
-            startCountdownFrom(data.remaining_seconds || 0);
-          }
-        } catch (e) {}
-      }
-
-      syncTimerFromStatus();
-      window.addEventListener("focus", syncTimerFromStatus);
-
-      function appendUser(text) {
-        const div = document.createElement("div");
-        div.className = "user-msg";
-        div.textContent = text;
-        chatBox.appendChild(div);
+        el.textContent += text.charAt(i++);
         chatBox.scrollTop = chatBox.scrollHeight;
+        setTimeout(tick, TYPE_DELAY_MS);
+      };
+      if (text.length === 0) {
+        resolve();
+      } else {
+        tick();
       }
+    });
+  }
 
-      function makeLoaderBubble() {
-        const div = document.createElement("div");
-        div.className = "bot-msg";
-        const wrap = document.createElement("div");
-        wrap.className = "typing";
-        wrap.innerHTML =
-          '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
-        div.appendChild(wrap);
-        return div;
-      }
+  async function appendBotAnimated(text) {
+    const bubble = document.createElement("div");
+    bubble.className = "bot-msg";
+    const content = document.createElement("div");
+    bubble.appendChild(content);
+    chatBox.appendChild(bubble);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-      function splitOptionsFromText(text) {
-        const lines = text.split(/\r?\n/);
-        const opts = [],
-          stem = [];
-        for (const l of lines) {
-          if (/^\s*[A-D]\.\s+/.test(l)) opts.push(l.trim());
-          else stem.push(l);
-        }
-        return { stem: stem.join("\n").trim(), opts };
-      }
+    const { stem, opts } = splitOptionsFromText(text || "");
+    await typeText(content, stem || "");
+    if (opts && opts.length >= 2) {
+      const ul = buildOptionsList(opts);
+      bubble.appendChild(ul);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  }
 
-      function buildOptionsList(opts) {
-        const ul = document.createElement("ul");
-        ul.className = "options";
-        opts.forEach((line) => {
-          const m = line.match(/^\s*([A-D])\.\s+(.+)$/);
-          if (!m) return;
-          const li = document.createElement("li");
-          li.dataset.letter = m[1];
-          li.innerHTML = `<strong>${m[1]}.</strong> ${escapeHtml(m[2])}`;
-          ul.appendChild(li);
-        });
-        return ul;
-      }
+  chatBox.addEventListener("click", (e) => {
+    const li = e.target.closest("li[data-letter]");
+    if (!li) return;
+    input.value = li.dataset.letter;
+    form.requestSubmit();
+  });
 
-      function escapeHtml(str) {
-        return str.replace(
-          /[&<>"]/g,
-          (s) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[s])
-        );
-      }
+  // unified sendMessage (handles both click + type)
+  async function sendMessage(message) {
+    appendUser(message);
 
-      function typeText(el, text) {
-        return new Promise((resolve) => {
-          let i = 0,
-            cancelled = false;
-          const finish = () => {
-            el.textContent = text;
-            resolve();
-          };
-          el.addEventListener(
-            "click",
-            () => {
-              cancelled = true;
-              finish();
-            },
-            { once: true }
-          );
-          const tick = () => {
-            if (cancelled) return;
-            if (i >= text.length) {
-              resolve();
-              return;
-            }
-            el.textContent += text.charAt(i++);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            setTimeout(tick, TYPE_DELAY_MS);
-          };
-          // start
-          if (text.length === 0) {
-            resolve();
-          } else {
-            tick();
-          }
-        });
-      }
+    const normalized = message.trim().toLowerCase();
+    const triggerPhrases = ["start exam", "begin exam", "start test"];
 
-      async function appendBotAnimated(text) {
-        // create bubble
-        const bubble = document.createElement("div");
-        bubble.className = "bot-msg";
-        // content area (typed)
-        const content = document.createElement("div");
-        bubble.appendChild(content);
-        chatBox.appendChild(bubble);
-        chatBox.scrollTop = chatBox.scrollHeight;
+    if (triggerPhrases.includes(normalized)) {
+      beginExamTimer();
+    }
 
-        // split out options
-        const { stem, opts } = splitOptionsFromText(text || "");
+    const loader = makeLoaderBubble();
+    chatBox.appendChild(loader);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-        // type the stem first
-        await typeText(content, stem || "");
-
-        // then reveal options as vertical list (if present)
-        if (opts && opts.length >= 2) {
-          const ul = buildOptionsList(opts);
-          bubble.appendChild(ul);
-          chatBox.scrollTop = chatBox.scrollHeight;
-        }
-      }
-
-      // click on an option sends that letter
-      chatBox.addEventListener("click", (e) => {
-        const li = e.target.closest("li[data-letter]");
-        if (!li) return;
-        input.value = li.dataset.letter;
-        form.requestSubmit();
+    try {
+      const res = await fetch("http://localhost:5005/webhooks/rest/webhook", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sender: "user",
+          message,
+          metadata: {
+            access_token: token,
+            ...(examId ? { exam_id: examId } : {}),
+          },
+        }),
       });
 
-      // ---------- network ----------
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const message = input.value.trim();
-        if (!message) return;
-        input.value = "";
-        sendMessage(message);
-      });
+      loader.remove();
 
-      async function sendMessage(message) {
-        appendUser(message);
-
-        // show typing loader while waiting for response
-        const loader = makeLoaderBubble();
-        chatBox.appendChild(loader);
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        try {
-          const res = await fetch(
-            "http://localhost:5005/webhooks/rest/webhook",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                sender: "user",
-                message,
-                metadata: {
-                  access_token: token,
-                  ...(examId ? { exam_id: examId } : {}),
-                },
-              }),
-            }
-          );
-
-          // remove loader
-          loader.remove();
-
-          if (!res.ok) {
-            await appendBotAnimated(
-              `⚠️ Error contacting the bot (${res.status}).`
-            );
-            return;
-          }
-          const data = await res.json();
-          if (!Array.isArray(data) || data.length === 0) {
-            await appendBotAnimated("… (no response)");
-            return;
-          }
-
-          // Animate each bot message sequentially
-          for (const msg of data) {
-            if (msg.text) {
-              await appendBotAnimated(msg.text);
-            }
-          }
-        } catch (err) {
-          loader.remove();
-          console.error(err);
-          await appendBotAnimated("⚠️ Network error. Please try again.");
-        }
+      if (!res.ok) {
+        await appendBotAnimated(`⚠️ Error contacting the bot (${res.status}).`);
+        return;
       }
 
-      // Warn user if they try to reload/close during an exam
-      window.addEventListener("beforeunload", function (e) {
-        if (remainingSecs > 0) {
-          e.preventDefault();
-          e.returnValue =
-            "You have an ongoing exam. Leaving will end your session.";
-          return e.returnValue;
-        }
-      });
-    </script>
+      const data = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        await appendBotAnimated("… (no response)");
+        return;
+      }
+
+      for (const msg of data) {
+        if (msg.text) await appendBotAnimated(msg.text);
+      }
+    } catch (err) {
+      loader.remove();
+      console.error(err);
+      await appendBotAnimated("⚠️ Network error. Please try again.");
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const message = input.value.trim();
+    if (!message) return;
+    input.value = "";
+    sendMessage(message);
+  });
+
+  window.addEventListener("beforeunload", function (e) {
+    if (remainingSecs > 0) {
+      e.preventDefault();
+      e.returnValue =
+        "You have an ongoing exam. Leaving will end your session.";
+      return e.returnValue;
+    }
+  });
+</script>
   </body>
 </html>
